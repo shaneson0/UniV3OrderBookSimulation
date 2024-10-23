@@ -82,6 +82,7 @@ for tick in range(currentTick - 1, tick_liquidity_list[1]['tick'] - 1, -1):
     print(f"Bids: {price}, Qty: {prev_tick_token1 - token11}")
     prev_tick_token1 = token11
 
+print(" ==== Bids and Asks =====")
 
 prev_tick_token0 = token0;
 for tick in range(currentTick+1, tick_liquidity_list[0]['tick'] + 1):
