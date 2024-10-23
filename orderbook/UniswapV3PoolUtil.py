@@ -33,8 +33,8 @@ class UniswapV3PoolUtil:
         return token0, token1
 
     def get_buy1_and_sell1_without_quantity(self, current_tick):
-        buy1_tick = current_tick - self.tick_spacing
-        sell1_tick = current_tick + self.tick_spacing
+        buy1_tick = current_tick - 1;
+        sell1_tick = current_tick + 1;
         buy1_price = self.get_price_at_tick(buy1_tick)
         sell1_price = self.get_price_at_tick(sell1_tick)
         return {'buy1': {'price': buy1_price}, 'sell1': {'price': sell1_price}}
