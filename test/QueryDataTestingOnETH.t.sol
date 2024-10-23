@@ -30,19 +30,17 @@ interface IUniswapV3Pool is IUniswapV3PoolImmutables {
         );
 }
 
-contract QueryDataTesting is Test {
+contract QueryDataTestingOnETH is Test {
     QueryActiveLiquidity public queryLiquidity;
 
-    address public V3Pool = 0x38231d4ef9d33EBea944C75a21301ff6986499C3;
-    address public V2Pool = 0xaf0Eb8F2f114917ef0026105c070Cf08423F488E;
-    address public queryDataAddress = 0xD0B2a7c5f9321e038eEC9D9d9e0623923c1c02a7;
+    address public V3Pool = 0xCBCdF9626bC03E24f779434178A73a0B4bad62eD;
     
     function setUp() public {
-        vm.createSelectFork("https://bsc.meowrpc.com");
+        vm.createSelectFork("https://eth.meowrpc.com");
         queryLiquidity = new QueryActiveLiquidity();
     }
 
-    function test0() public {
+    function test0OnETH() public {
         (
             uint160 currentPriceSqrtPriceX96,
             int24 tick,
@@ -54,21 +52,7 @@ contract QueryDataTesting is Test {
         ) = IUniswapV3Pool(V3Pool).slot0();
         uint256 currentPrice = uint256(currentPriceSqrtPriceX96);
 
-        // 计算对应的tick数
-        int24 downTick = tick - 10;
-        int24 upTick = tick + 10;
-
-        console.log("downTick", downTick);
-        console.log("tick: ", tick);
-        console.log("upTick", upTick);
-
-        // tick0 price:  2.4842149800124597e-10
-        // tick1 price:  5.879746384524717e-10
-        // tick2 price:  9.936227245421387e-10
-
-        require( downTick < tick && tick < upTick, "check ticks" );
-
-        bytes memory infos = queryLiquidity.queryUniv3TicksSuperCompact(V3Pool, 100);
+        bytes memory infos = queryLiquidity.queryUniv3TicksSuperCompact(V3Pool, 50);
         console.logBytes(infos);
 
         for (uint256 i = 0; i < infos.length; i += 32) {

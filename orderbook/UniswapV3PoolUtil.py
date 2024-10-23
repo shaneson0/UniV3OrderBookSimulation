@@ -27,6 +27,11 @@ class UniswapV3PoolUtil:
 
         return order_book
 
+    def calculate_tokens(self, L, P_low, P_high):
+        token0 = L * (1 / (P_low ** 0.5) - 1 / (P_high ** 0.5))
+        token1 = L * (P_high ** 0.5 - P_low ** 0.5)
+        return token0, token1
+
     def get_buy1_and_sell1_without_quantity(self, current_tick):
         buy1_tick = current_tick - self.tick_spacing
         sell1_tick = current_tick + self.tick_spacing
@@ -34,37 +39,19 @@ class UniswapV3PoolUtil:
         sell1_price = self.get_price_at_tick(sell1_tick)
         return {'buy1': {'price': buy1_price}, 'sell1': {'price': sell1_price}}
 
+
     def get_buy1_and_sell1_with_quantity(self, current_tick, liquidity):
         buy1_tick = current_tick - self.tick_spacing
         sell1_tick = current_tick + self.tick_spacing
         buy1_price = self.get_price_at_tick(buy1_tick)
         sell1_price = self.get_price_at_tick(sell1_tick)
-        buy1_quantity = liquidity / buy1_price
-        sell1_quantity = liquidity * sell1_price
+
+        (buy1_quantity, sell1_quantity) = self.calculate_tokens(liquidity, buy1_price, sell1_price)
         return {'buy1': {'price': buy1_price, 'quantity': buy1_quantity}, 'sell1': {'price': sell1_price, 'quantity': sell1_quantity}}
 
-
-
-
-# # Example usage
-# liquidity = 146397912183698051832063671
-# tick_spacing = 50
-# current_tick = -212792
-
-# pool = UniswapV3Pool(tick_spacing)
-# order_book = pool.simulate_order_book(current_tick, liquidity)
-# buy1_and_sell1 = pool.get_buy1_and_sell1(current_tick, liquidity)
-
-# print("Order Book:")
-# print("Bids:")
-# for bid in order_book['bids']:
-#     print(f"Price: {bid['price']}, Quantity: {bid['quantity']}")
-
-# print("\nAsks:")
-# for ask in order_book['asks']:
-#     print(f"Price: {ask['price']}, Quantity: {ask['quantity']}")
-
-# print("\nBuy1 and Sell1:")
-# print(f"Buy1 - Price: {buy1_and_sell1['buy1']['price']}, Quantity: {buy1_and_sell1['buy1']['quantity']}")
-# print(f"Sell1 - Price: {buy1_and_sell1['sell1']['price']}, Quantity: {buy1_and_sell1['sell1']['quantity']}")
+    def get_buy_and_sell_with_quantity_duringTicks(self, lowerTick, upperTick, liquidity):
+        lower_price = self.get_price_at_tick(lowerTick)
+        upper_price = self.get_price_at_tick(upperTick)
+        (buy1_quantity, sell1_quantity) = self.calculate_tokens(liquidity, lower_price, upper_price)
+        return {'buy1': {'lower_price': lower_price, 'quantity': buy1_quantity}, 'sell1': {'upper_price': upper_price, 'quantity': sell1_quantity}}
 
