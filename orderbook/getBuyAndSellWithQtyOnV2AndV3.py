@@ -119,6 +119,25 @@ def get_bids_and_asks(rpc_url, v2_pool_address, v3_pool_address, query_data_addr
     bids_and_asks = (tuple(bids), tuple(asks))
     return bids_and_asks
 
+def get_ToB_price(rpc_url,v3_pool_address, v3_abi_path):
+    # 连接到BSC节点
+    web3 = Web3(Web3.HTTPProvider(rpc_url))
+
+    # 检查连接是否成功
+    if not web3.is_connected():
+        raise Exception("connect error")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    with open(v3_abi_path, 'r') as abi_file:
+        abi = json.load(abi_file)
+
+    v3Pool = web3.eth.contract(address=v3_pool_address, abi=abi)
+    # 调用合约的slot0函数获取当前价格和tick等信息
+    slot0 = v3Pool.functions.slot0().call()
+    currentTick = slot0[1]  
+
+    return (1.0001 ** (currentTick-1), 1.0001 ** (currentTick+1))
+
 
 if __name__ == "__main__":
     rpc_url = "https://bsc-dataseed.binance.org/"
@@ -130,5 +149,10 @@ if __name__ == "__main__":
     v3_abi_path = os.path.join(current_dir, 'abis/uniswapV3.abi.json')
     query_data_abi_path = os.path.join(current_dir, 'abis/querydata.abi.json')
 
-    bids_and_asks = get_bids_and_asks(rpc_url, v2_pool_address, v3_pool_address, query_data_address, v2_abi_path, v3_abi_path, query_data_abi_path)
-    print("Generated Bids and Asks:", bids_and_asks)
+    # bids_and_asks = get_bids_and_asks(rpc_url, v2_pool_address, v3_pool_address, query_data_address, v2_abi_path, v3_abi_path, query_data_abi_path)
+    # print("Generated Bids and Asks:", bids_and_asks)
+
+
+    (bid1_price, ask1_price) = get_ToB_price(rpc_url, v3_pool_address, v3_abi_path)
+    print("bid1_price: ", bid1_price, ", ask1_price: ", ask1_price)
+
