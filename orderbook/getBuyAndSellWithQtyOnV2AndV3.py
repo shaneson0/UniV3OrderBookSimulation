@@ -71,9 +71,11 @@ def get_bids_and_asks(rpc_url, v2_pool_address, v3_pool_address, query_data_addr
     # WBNB(v2_token1)/Cheems(v2_token0) => price
     # v2_token1 * v2_token0 = k
     # v2_token1^2 = price * k
+    # v2_token1 = sqrt(price * k)
+    # v2_token0 = K / v2_token1
 
-    v2_token1 = math.sqrt(UniswapV2K * 1.0001 ** currentTick)
-    v2_token0 = math.sqrt(UniswapV2K / (1.0001 ** currentTick))
+    v2_token1 = math.sqrt(UniswapV2K * (1.0001 ** currentTick))
+    v2_token0 = UniswapV2K / v2_token1
 
     upper_bound = (currentTick + 5) if (currentTick + 5 < tick_liquidity_list[0]['tick'] - 1) else (tick_liquidity_list[0]['tick'] - 1)
     lower_bound = (currentTick - 5) if (currentTick - 5 > tick_liquidity_list[1]['tick'] + 1) else (tick_liquidity_list[1]['tick'] + 1)
@@ -89,6 +91,9 @@ def get_bids_and_asks(rpc_url, v2_pool_address, v3_pool_address, query_data_addr
         token11 = liquidity * math.sqrt(price)
         v2_token11 = math.sqrt(UniswapV2K * price)
 
+        # print("v3: ", (prev_tick_token1 - token11))
+        # print("v2: ", (v2_prev_tick_token1 - v2_token11))
+
         bids.append((price, (prev_tick_token1 - token11) + (v2_prev_tick_token1 - v2_token11)))
         prev_tick_token1 = token11
         v2_prev_tick_token1 = v2_token11
@@ -101,7 +106,11 @@ def get_bids_and_asks(rpc_url, v2_pool_address, v3_pool_address, query_data_addr
         price = 1.0001 ** tick
 
         token00 = liquidity / math.sqrt(price)
-        v2_token00 = math.sqrt(UniswapV2K / price)
+        v2_token11 = math.sqrt(UniswapV2K * price)
+        v2_token00 = UniswapV2K / v2_token11
+
+        # print("v3: ", (prev_tick_token0 - token00))
+        # print("v2: ", (v2_prev_tick_token0 - v2_token00))
 
         asks.append((price, (prev_tick_token0 - token00) + (v2_prev_tick_token0 - v2_token00)))
         prev_tick_token0 = token00
